@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #9B4500;
+  --primary-container: #FF7F27;
+  --secondary: #13336B;
+  --secondary-container: #a3bdfe;
+  --surface: #fbf9f9;
+}
+
+.dark {
+  --primary: #FFB68E;
+  --primary-container: #FF7F27;
+  --secondary: #AFC6FF;
+  --secondary-container: #29457E;
+  --surface: #131314;
+}
+
+body {
+  @apply bg-surface text-on-surface antialiased;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.dark body,
+body.dark {
+  background-color: #131314;
+  color: #e4e2e2;
+}
+
+@layer components {
+  .glass-nav {
+    @apply bg-white/80 backdrop-blur-xl;
+  }
+
+  .dark .glass-nav {
+    background: rgba(19, 19, 20, 0.85);
+    backdrop-filter: blur(20px);
+  }
+
+  .liquid-orange-gradient {
+    background: linear-gradient(135deg, #9B4500 0%, #FF7F27 100%);
+  }
+
+  .tonal-stack-low {
+    @apply shadow-[0_8px_24px_rgba(27,28,28,0.06)];
+  }
+
+  .dark .tonal-stack-low {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .no-line-card {
+    @apply bg-surface-container-lowest rounded-lg;
+  }
+
+  /* Editorial Typography */
+  .display-hero {
+    @apply text-5xl lg:text-[3.5rem] font-extrabold leading-tight tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  .headline-section {
+    @apply text-3xl md:text-[1.75rem] font-bold leading-tight;
+  }
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
