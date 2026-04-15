@@ -1,144 +1,121 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import cnhoraLogo from '/cnhora-logo.svg';
 
-const Navbar = ({ isDark, toggleTheme }) => {
+const navLinks = [
+  { name: 'Como funciona', href: '#manifesto' },
+  { name: 'Para instrutores', href: '#instrutores' },
+  { name: 'Preços', href: '#cta' },
+];
+
+const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Alunos', href: '#alunos' },
-    { name: 'Instrutores', href: '#alunos' },
-    { name: 'Autoescolas', href: '#alunos' },
-  ];
-
   return (
-    <nav 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'glass-nav py-3' : 'bg-transparent py-5'
+    <nav
+      className={`fixed top-0 w-full z-50 transition-all duration-400 ${
+        isScrolled
+          ? 'glass-nav border-b border-white/5 py-3.5'
+          : 'bg-transparent py-5'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        <motion.div 
+      <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
+        {/* Logo */}
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2.5"
         >
-          <img 
-            src={cnhoraLogo} 
-            alt="CNHora Logo" 
-            className="h-8 w-auto"
-          />
-          <span className="text-2xl font-black text-secondary dark:text-white tracking-tighter">CNHora</span>
+          <img src={cnhoraLogo} alt="CNHora Logo" className="h-7 w-auto" />
+          <span
+            className="text-xl font-black tracking-tight"
+            style={{ color: 'white' }}
+          >
+            CN<span style={{ color: '#FF6B00' }}>Hora</span>
+          </span>
         </motion.div>
 
-        {/* Desktop Menu */}
+        {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link, index) => (
+          {navLinks.map((link, i) => (
             <motion.a
               key={link.name}
               href={link.href}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-secondary dark:hover:text-white transition-colors"
+              transition={{ delay: i * 0.1 }}
+              className="text-sm font-medium transition-colors duration-200"
+              style={{ color: 'rgba(200,220,255,0.7)' }}
+              onMouseEnter={e => (e.target.style.color = 'white')}
+              onMouseLeave={e => (e.target.style.color = 'rgba(200,220,255,0.7)')}
             >
               {link.name}
             </motion.a>
           ))}
 
-          {/* Theme Toggle */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            aria-label={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {isDark ? (
-                <motion.div
-                  key="sun"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Sun size={20} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="moon"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Moon size={20} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
-
           <motion.a
             href="#cta"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="liquid-orange-gradient text-white px-6 py-2.5 rounded-lg font-bold text-sm"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            whileHover={{ translateY: -1 }}
+            whileTap={{ scale: 0.97 }}
+            className="text-sm font-bold text-white px-5 py-2 rounded-xl transition-all duration-200"
+            style={{
+              background: 'linear-gradient(135deg, #FF8C00, #FF4500)',
+              boxShadow: '0 4px 15px rgba(255,107,0,0.3)',
+            }}
           >
-            Começar
+            Começar grátis
           </motion.a>
         </div>
 
-        {/* Mobile Toggle */}
-        <div className="md:hidden flex items-center gap-3">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-secondary dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            aria-label={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
-          >
-            {isDark ? <Sun size={22} /> : <Moon size={22} />}
-          </button>
-          <button 
-            className="text-secondary dark:text-white"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
-        </div>
+        {/* Mobile toggle */}
+        <button
+          className="md:hidden text-white"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+        </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass-nav border-t border-slate-100 dark:border-slate-800 overflow-hidden"
+            className="md:hidden glass-nav border-t overflow-hidden"
+            style={{ borderColor: 'rgba(255,255,255,0.05)' }}
           >
-            <div className="px-6 py-8 flex flex-col gap-6">
-              {navLinks.map((link) => (
+            <div className="px-8 py-6 flex flex-col gap-5">
+              {navLinks.map(link => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-lg font-bold text-secondary dark:text-white"
+                  className="text-base font-semibold"
+                  style={{ color: 'rgba(200,220,255,0.85)' }}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}
                 </a>
               ))}
-              <a href="#cta" className="liquid-orange-gradient text-white px-6 py-4 rounded-lg font-bold text-center block" onClick={() => setIsMobileMenuOpen(false)}>
-                Começar
+              <a
+                href="#cta"
+                className="text-white font-bold px-6 py-3.5 rounded-xl text-center"
+                style={{ background: 'linear-gradient(135deg, #FF8C00, #FF4500)' }}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Começar grátis
               </a>
             </div>
           </motion.div>
