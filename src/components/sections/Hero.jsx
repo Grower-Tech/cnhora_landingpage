@@ -113,13 +113,13 @@ const Hero = () => {
   const heroRef = useRef(null);
   const canvasRef = useRef(null);
   const logoRef = useRef(null);
+  const animGroupRef = useRef(null);
   const ring1Ref = useRef(null);
   const ring2Ref = useRef(null);
   const ring3Ref = useRef(null);
   const gridRef = useRef(null);
-  const card1Ref = useRef(null);
-  const card2Ref = useRef(null);
-  const card3Ref = useRef(null);
+  const cardsContainerRef = useRef(null);
+  const cardRefs = useRef([]);
   const finalRef = useRef(null);
   const progressRef = useRef(null);
   const indicatorRef = useRef(null);
@@ -210,11 +210,10 @@ const Hero = () => {
     const hero = heroRef.current;
     if (!hero) return;
 
-    // Orbital rings entrance
-    gsap.from([ring1Ref.current, ring2Ref.current, ring3Ref.current], {
-      scale: 0, opacity: 0, duration: 1.5, stagger: 0.3,
-      ease: 'back.out(1.7)', delay: 0.5,
-    });
+    // Initial states
+    gsap.set(finalRef.current, { opacity: 1, x: 0 });
+    gsap.set(animGroupRef.current, { opacity: 1, x: 0, scale: 1 });
+    gsap.set(cardsContainerRef.current, { opacity: 0, x: '100vw' });
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -228,46 +227,70 @@ const Hero = () => {
       },
     });
 
-    // 1. Logo fade + rings fade
-    tl.to(logoRef.current, { y: -50, opacity: 0, ease: 'power2.inOut', duration: 2.5 }, 0);
-    tl.to([ring1Ref.current, ring2Ref.current, ring3Ref.current], { scale: 0.5, opacity: 0, ease: 'power2.in', duration: 2 }, 0);
-    tl.to(gridRef.current, { opacity: 0.3, duration: 1, ease: 'power1.in' }, 0.5);
-    tl.to(gridRef.current, { opacity: 0, duration: 1.5, ease: 'power2.in' }, 1.5);
+    // 1. Initial Content Fade Out (Hero Text + Logo Animation)
+    tl.to(finalRef.current, { 
+      opacity: 0, 
+      y: -50, 
+      duration: 3,
+      ease: 'power2.inOut'
+    }, 0);
 
-    // 2. Feature cards slide-up (y-axis)
-    const animateCard = (cardEl, startTime) => {
-      gsap.set(cardEl, { y: 200, opacity: 0 });
-      tl
-        .to(cardEl, { y: 0, opacity: 1, ease: 'power2.out', duration: 2 }, startTime)
-        .to(cardEl, { y: -150, opacity: 0, ease: 'power2.in', duration: 1.5 }, startTime + 2);
-    };
-    animateCard(card1Ref.current, 2.0);
-    animateCard(card2Ref.current, 4.0);
-    animateCard(card3Ref.current, 6.0);
+    tl.to(animGroupRef.current, { 
+      opacity: 0, 
+      scale: 0.8,
+      x: 100,
+      duration: 3,
+      ease: 'power2.inOut'
+    }, 0);
+    
+    tl.to(gridRef.current, { opacity: 0.4, duration: 2, ease: 'power1.in' }, 0);
+    tl.to(gridRef.current, { opacity: 0, duration: 2, ease: 'power2.in' }, 2);
 
-    // 3. Hero final content
-    tl.fromTo(
-      finalRef.current,
-      { y: 60, opacity: 0, scale: 0.98, filter: 'blur(8px)' },
-      { y: 0, opacity: 1, scale: 1, filter: 'blur(0px)', ease: 'expo.out', duration: 2 },
-      8.0
+    // 2. Feature cards slide-in from right and occupy the whole screen
+    tl.fromTo(cardsContainerRef.current, 
+      { x: '100vw', opacity: 0 },
+      { x: '0vw', opacity: 1, ease: 'expo.out', duration: 4 },
+      2.5
     );
 
-    // Enable pointer events on final content
-    ScrollTrigger.create({
-      trigger: hero,
-      start: '+=380%',
-      onEnter: () => finalRef.current && (finalRef.current.style.pointerEvents = 'auto'),
-      onLeaveBack: () => finalRef.current && (finalRef.current.style.pointerEvents = 'none'),
+    // Stagger individual cards within the container
+    cardRefs.current.forEach((card, index) => {
+      tl.fromTo(card,
+        { x: 150, opacity: 0, scale: 0.8, filter: 'blur(10px)' },
+        { x: 0, opacity: 1, scale: 1, filter: 'blur(0px)', ease: 'back.out(1.2)', duration: 2.5 },
+        3.5 + (index * 0.5)
+      );
     });
 
-    // Mouse parallax on logo
+    // Enable pointer events appropriately
+    ScrollTrigger.create({
+      trigger: hero,
+      start: 'top top',
+      onEnter: () => {
+        if (finalRef.current) finalRef.current.style.pointerEvents = 'auto';
+      }
+    });
+
+    ScrollTrigger.create({
+      trigger: hero,
+      start: '+=250%',
+      onEnter: () => {
+        if (cardsContainerRef.current) cardsContainerRef.current.style.pointerEvents = 'auto';
+        if (finalRef.current) finalRef.current.style.pointerEvents = 'none';
+      },
+      onLeaveBack: () => {
+        if (cardsContainerRef.current) cardsContainerRef.current.style.pointerEvents = 'none';
+        if (finalRef.current) finalRef.current.style.pointerEvents = 'auto';
+      }
+    });
+
+    // Mouse parallax on logo (active only when visible)
     const onParallax = e => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      const logo = logoRef.current;
-      if (logo && parseFloat(getComputedStyle(logo).opacity) > 0.1) {
-        gsap.to(logo, { x, y, duration: 1.5, ease: 'power2.out', overwrite: 'auto' });
+      const x = (e.clientX / window.innerWidth - 0.5) * 30;
+      const y = (e.clientY / window.innerHeight - 0.5) * 30;
+      const logoGroup = animGroupRef.current;
+      if (logoGroup && parseFloat(getComputedStyle(logoGroup).opacity) > 0.1) {
+        gsap.to(logoGroup, { x: x, y: y, duration: 1.5, ease: 'power2.out', overwrite: 'auto' });
       }
     };
     document.addEventListener('mousemove', onParallax);
@@ -374,66 +397,58 @@ const Hero = () => {
         {/* Perspective grid */}
         <PerspectiveGrid ref={gridRef} />
 
-        {/* Orbital rings */}
-        <div
-          ref={ring1Ref}
-          className="orbital-ring ring-1"
-          style={{ width: 380, height: 380, border: '1px solid rgba(255,107,0,0.25)', zIndex: 15 }}
-        />
-        <div
-          ref={ring2Ref}
-          className="orbital-ring ring-2"
-          style={{ width: 460, height: 460, border: '1px solid rgba(0,102,204,0.25)', zIndex: 15 }}
-        />
-        <div
-          ref={ring3Ref}
-          className="orbital-ring ring-3"
-          style={{ width: 540, height: 540, border: '1px solid rgba(255,107,0,0.12)', zIndex: 15 }}
-        />
-
-        {/* Logo */}
-        <div
-          ref={logoRef}
-          style={{
-            position: 'absolute',
-            width: 320, height: 320,
-            zIndex: 20,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transformOrigin: 'center center',
-            willChange: 'transform, opacity',
-            filter: 'drop-shadow(0 0 40px rgba(255,107,0,0.5)) drop-shadow(0 0 80px rgba(0,100,255,0.3))',
-          }}
-        >
-          <img
-            src={cnhoraLogo}
-            alt="CNHora"
-            className="logo-glow-anim"
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        {/* Animation Group (Logo + Rings) - Positioned Right */}
+        <div ref={animGroupRef} className="hero-animation-group">
+          {/* Orbital rings - absolute centered in group */}
+          <div
+            ref={ring1Ref}
+            className="orbital-ring ring-1"
+            style={{ width: 380, height: 360, border: '1px solid rgba(255,107,0,0.25)', zIndex: 15 }}
           />
+          <div
+            ref={ring2Ref}
+            className="orbital-ring ring-2"
+            style={{ width: 460, height: 440, border: '1px solid rgba(0,102,204,0.25)', zIndex: 15 }}
+          />
+          <div
+            ref={ring3Ref}
+            className="orbital-ring ring-3"
+            style={{ width: 540, height: 520, border: '1px solid rgba(255,107,0,0.12)', zIndex: 15 }}
+          />
+
+          {/* Logo container - relative centered in group */}
+          <div className="logo-container">
+            <div
+              ref={logoRef}
+              style={{
+                width: 280, height: 280,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                filter: 'drop-shadow(0 0 35px rgba(255,107,0,0.45)) drop-shadow(0 0 70px rgba(0,100,255,0.25))',
+              }}
+            >
+              <img
+                src={cnhoraLogo}
+                alt="CNHora"
+                className="logo-glow-anim"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Feature cards */}
-        <FeatureCard ref={card1Ref} {...CARDS[0]} />
-        <FeatureCard ref={card2Ref} {...CARDS[1]} />
-        <FeatureCard ref={card3Ref} {...CARDS[2]} />
+        {/* Feature cards container - Centered full screen during scroll phase */}
+        <div ref={cardsContainerRef} className="hero-cards-container">
+          {CARDS.map((card, idx) => (
+            <FeatureCard 
+              key={card.id}
+              ref={el => cardRefs.current[idx] = el}
+              {...card} 
+            />
+          ))}
+        </div>
 
-        {/* Final hero content */}
-        <div
-          ref={finalRef}
-          style={{
-            position: 'absolute',
-            zIndex: 30,
-            opacity: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            pointerEvents: 'none',
-            width: '100%',
-            maxWidth: 900,
-            padding: '0 1.5rem',
-          }}
-        >
+        {/* Main hero content - Positioned Left */}
+        <div ref={finalRef} className="hero-content-wrapper">
           {/* Badge */}
           <div className="hero-badge">
             <span className="dot" />
@@ -468,11 +483,6 @@ const Hero = () => {
               <div className="stat-number">4.9★</div>
               <div className="stat-label">Avaliação média</div>
             </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <div className="stat-number">98%</div>
-              <div className="stat-label">Taxa de aprovação</div>
-            </div>
           </div>
 
           {/* CTAs */}
@@ -504,18 +514,6 @@ const Hero = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Pagamento Seguro
-            </div>
-            <div className="trust-badge">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Aprovação Rápida
-            </div>
-            <div className="trust-badge">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              Suporte 24/7
             </div>
           </div>
         </div>
