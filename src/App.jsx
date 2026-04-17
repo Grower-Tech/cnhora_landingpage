@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Navbar from './components/layout/Navbar';
 import Hero from './components/sections/Hero';
+import { ErrorBoundary } from './components/ui';
 
 function App() {
   return (
@@ -15,7 +16,9 @@ function App() {
       </Helmet>
 
       <Navbar />
-      <Hero />
+      <ErrorBoundary>
+        <Hero />
+      </ErrorBoundary>
     </div>
   );
 }

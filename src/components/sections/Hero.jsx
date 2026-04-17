@@ -4,6 +4,33 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import cnhoraLogo from '/cnhora-logo.svg';
 import Features from './Features';
+import { isWebGLSupported } from '../../utils';
+
+const HeroFallback = () => (
+  <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse 80% 60% at 50% 50%, #003366 0%, #001428 50%, #000810 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+    <div style={{ maxWidth: 600, textAlign: 'center', color: '#fff' }}>
+      <div style={{ marginBottom: '1.5rem', fontSize: '0.85rem', color: '#ff6b00', fontWeight: 600, letterSpacing: '0.05em' }}>
+        O marketplace da educação no trânsito
+      </div>
+      <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: '1.5rem' }}>
+        Seu tempo.<br /><span style={{ color: '#ff6b00' }}>Sua direção.</span>
+      </h1>
+      <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.7)', marginBottom: '2rem', lineHeight: 1.7 }}>
+        Conectamos alunos a instrutores independentes com tecnologia de ponta.
+        Agende aulas, faça simulados e conquiste sua CNH sem burocracia.
+      </p>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
+        <a href="#cta" style={{ background: '#ff6b00', color: '#fff', padding: '0.9rem 2rem', borderRadius: 8, fontWeight: 700, textDecoration: 'none', fontSize: '1rem' }}>Sou Aluno</a>
+        <a href="#instrutores" style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '0.9rem 2rem', borderRadius: 8, fontWeight: 700, textDecoration: 'none', fontSize: '1rem' }}>Sou Instrutor</a>
+      </div>
+      <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+        <span><strong style={{ color: '#fff', fontSize: '1.2rem' }}>+12k</strong><br />Alunos aprovados</span>
+        <span><strong style={{ color: '#fff', fontSize: '1.2rem' }}>+800</strong><br />Instrutores ativos</span>
+        <span><strong style={{ color: '#fff', fontSize: '1.2rem' }}>4.9★</strong><br />Avaliação média</span>
+      </div>
+    </div>
+  </div>
+);
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,6 +89,7 @@ const PerspectiveGrid = React.forwardRef((_, ref) => (
 
 /* ─── Main Hero component ─── */
 const Hero = () => {
+  const [webglOk, setWebglOk] = useState(true);
   const [activeTab, setActiveTab] = useState('aluno');
   const heroRef = useRef(null);
   const canvasRef = useRef(null);
@@ -77,6 +105,10 @@ const Hero = () => {
   const progressRef = useRef(null);
   const indicatorRef = useRef(null);
 
+  useEffect(() => {
+    setWebglOk(isWebGLSupported());
+  }, []);
+
   const goToCards = (tab) => {
     setActiveTab(tab);
     const heroTop = heroRef.current
@@ -90,7 +122,14 @@ const Hero = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    } catch (err) {
+      console.error('[Hero] WebGL init failed:', err);
+      setWebglOk(false);
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -310,6 +349,8 @@ const Hero = () => {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  if (!webglOk) return <HeroFallback />;
 
   return (
     <>
