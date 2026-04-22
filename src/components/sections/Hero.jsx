@@ -219,6 +219,11 @@ const Hero = () => {
   const showcaseScreenRefs = useRef([]);
   const showcaseTextRefs = useRef([]);
   const showcaseDotRefs = useRef([]);
+  const ctaRef = useRef(null);
+  const ctaLogoRef = useRef(null);
+  const ctaTitleRef = useRef(null);
+  const ctaTextRef = useRef(null);
+  const ctaButtonsRef = useRef(null);
 
   useEffect(() => {
     setWebglOk(isWebGLSupported());
@@ -330,6 +335,11 @@ const Hero = () => {
     gsap.set(animGroupRef.current, { opacity: 1, x: 0, scale: 1 });
     gsap.set(cardsContainerRef.current, { opacity: 0, x: '100vw' });
     gsap.set(showcaseRef.current, { opacity: 0 });
+    gsap.set(ctaRef.current, { opacity: 0 });
+    gsap.set(ctaLogoRef.current, { opacity: 0, y: 50 });
+    gsap.set(ctaTitleRef.current, { opacity: 0, y: 40 });
+    gsap.set(ctaTextRef.current, { opacity: 0, y: 35 });
+    gsap.set(ctaButtonsRef.current, { opacity: 0, y: 30 });
     showcaseScreenRefs.current.forEach((el, i) => {
       if (el) gsap.set(el, { opacity: i === 0 ? 1 : 0 });
     });
@@ -341,15 +351,15 @@ const Hero = () => {
       scrollTrigger: {
         trigger: hero,
         start: 'top top',
-        end: '+=800%',
+        end: '+=1100%',
         scrub: 1.2,
         pin: true,
         pinSpacing: true,
         anticipatePin: 1,
         onUpdate: (self) => {
           // Update showcase dots based on position within showcase phase
-          const phaseStart = 9.5 / 17;
-          const phaseEnd = 16 / 17;
+          const phaseStart = 9.5 / 21;
+          const phaseEnd = 17 / 21;
           if (self.progress >= phaseStart && self.progress <= phaseEnd) {
             const p = (self.progress - phaseStart) / (phaseEnd - phaseStart);
             const idx = Math.min(Math.floor(p * 3), 2);
@@ -417,8 +427,18 @@ const Hero = () => {
     tl.to(showcaseScreenRefs.current[2], { opacity: 1, duration: 1.5, ease: 'power1.inOut' }, 14.5);
     tl.fromTo(showcaseTextRefs.current[2], { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 2, ease: 'power2.out' }, 15);
 
+    // AppShowcase fades out before CTA
+    tl.to(showcaseRef.current, { opacity: 0, duration: 1, ease: 'power2.inOut' }, 17);
+
+    // CTA section staggered entrance
+    tl.to(ctaRef.current, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 18);
+    tl.to(ctaLogoRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 18);
+    tl.to(ctaTitleRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 18.5);
+    tl.to(ctaTextRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 19);
+    tl.to(ctaButtonsRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 19.5);
+
     // End pad
-    tl.to({}, { duration: 1 }, 16);
+    tl.to({}, { duration: 1 }, 22);
 
     // Enable pointer events appropriately
     ScrollTrigger.create({
@@ -439,6 +459,17 @@ const Hero = () => {
       onLeaveBack: () => {
         if (cardsContainerRef.current) cardsContainerRef.current.style.pointerEvents = 'none';
         if (finalRef.current) finalRef.current.style.pointerEvents = 'auto';
+      }
+    });
+
+    ScrollTrigger.create({
+      trigger: hero,
+      start: '+=870%',
+      onEnter: () => {
+        if (ctaRef.current) ctaRef.current.style.pointerEvents = 'auto';
+      },
+      onLeaveBack: () => {
+        if (ctaRef.current) ctaRef.current.style.pointerEvents = 'none';
       }
     });
 
@@ -692,6 +723,69 @@ const Hero = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* CTA Download Section — animated in after AppShowcase */}
+        <div ref={ctaRef} className="cta-download-section">
+
+          {/* Animated logo with orbital rings */}
+          <div ref={ctaLogoRef} className="cta-logo-wrapper">
+            <div
+              className="orbital-ring ring-1"
+              style={{ width: 200, height: 190, border: '1px solid rgba(255,107,0,0.2)', zIndex: 1 }}
+            />
+            <div
+              className="orbital-ring ring-2"
+              style={{ width: 250, height: 240, border: '1px solid rgba(0,102,204,0.18)', zIndex: 1 }}
+            />
+            <div className="logo-container" style={{ position: 'relative', zIndex: 2 }}>
+              <div
+                style={{
+                  width: 90, height: 90,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  filter: 'drop-shadow(0 0 24px rgba(255,107,0,0.5)) drop-shadow(0 0 48px rgba(0,100,255,0.2))',
+                }}
+              >
+                <img
+                  src={cnhoraLogo}
+                  alt="CNHora"
+                  className="logo-glow-anim"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Headline */}
+          <h2 ref={ctaTitleRef} className="cta-title">
+            Baixe o app e comece sua{' '}
+            <span className="highlight">jornada hoje</span>
+          </h2>
+
+          {/* Description */}
+          <p ref={ctaTextRef} className="cta-desc">
+            Tenha o controle total da sua habilitação na palma da mão.
+            Agende aulas, acompanhe seu progresso e conecte‑se com instrutores.
+          </p>
+
+          {/* Store buttons */}
+          <div ref={ctaButtonsRef} className="cta-buttons">
+            <a href="#playstore" className="cta-btn cta-btn-play">
+              {/* Play Store triangle icon */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M3 20.5v-17c0-.83 1-.9 1.4-.42l14 8.5a.5.5 0 010 .84l-14 8.5C4 21.4 3 21.33 3 20.5z"/>
+              </svg>
+              Baixar na Playstore
+            </a>
+            <a href="#appstore" className="cta-btn cta-btn-apple">
+              {/* Apple logo icon */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              Baixar na Apple Store
+            </a>
+          </div>
+
         </div>
 
         {/* Main hero content - Positioned Left */}

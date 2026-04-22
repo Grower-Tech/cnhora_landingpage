@@ -891,6 +891,114 @@ body {
   overflow: hidden;
 }
 
+/* ── CTA Download Section ── */
+
+.cta-download-section {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  text-align: center;
+  padding: 0 2rem;
+  pointer-events: none; /* re-enabled by ScrollTrigger when visible */
+}
+
+/* Logo wrapper — rings + image, mirrors hero animation group */
+.cta-logo-wrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3.5rem;
+  flex-shrink: 0;
+}
+
+.cta-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  max-width: 700px;
+}
+
+.cta-desc {
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.75;
+  max-width: 520px;
+  margin-bottom: 2.5rem;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  border: none;
+  font-family: inherit;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+}
+
+.cta-btn:focus-visible {
+  outline: 2px solid rgba(255, 107, 0, 0.8);
+  outline-offset: 3px;
+}
+
+.cta-btn:active {
+  transform: translateY(0);
+}
+
+.cta-btn-play:active {
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.5);
+}
+
+/* Play Store button — orange gradient matching brand primary */
+.cta-btn-play {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(255, 107, 0, 0.4);
+}
+
+.cta-btn-play:hover {
+  box-shadow: 0 12px 40px rgba(255, 107, 0, 0.6);
+}
+
+/* Apple Store button — glass / secondary */
+.cta-btn-apple {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.cta-btn-apple:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 /* ── Screen content layout ── */
 
 .screen-app-bar {
