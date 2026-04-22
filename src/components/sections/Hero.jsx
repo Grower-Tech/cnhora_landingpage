@@ -624,23 +624,23 @@ const Hero = () => {
                   <span className="phone-status-time">9:41</span>
                   <div className="phone-status-icons">
                     {/* Signal bars */}
-                    <svg width="17" height="12" viewBox="0 0 17 12" fill="white">
+                    <svg width="14" height="10" viewBox="0 0 17 12" fill="white">
                       <rect x="0" y="6" width="3" height="6" rx="1"/>
                       <rect x="4.5" y="4" width="3" height="8" rx="1"/>
                       <rect x="9" y="2" width="3" height="10" rx="1"/>
                       <rect x="13.5" y="0" width="3" height="12" rx="1"/>
                     </svg>
                     {/* WiFi */}
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+                    <svg width="14" height="10" viewBox="0 0 16 12" fill="none">
                       <circle cx="8" cy="10.5" r="1.5" fill="white"/>
                       <path d="M5 7.5a4.5 4.5 0 016 0" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                       <path d="M2 4.5a8 8 0 0112 0" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
                     {/* Battery */}
-                    <svg width="26" height="12" viewBox="0 0 26 12" fill="none">
-                      <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" strokeOpacity="0.35"/>
-                      <rect x="2" y="2" width="16" height="8" rx="2" fill="white"/>
-                      <path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="white" fillOpacity="0.4"/>
+                    <svg width="22" height="10" viewBox="0 0 25 12" fill="none">
+                      <rect x="0.5" y="0.5" width="20" height="11" rx="3.5" stroke="white" strokeOpacity="0.35"/>
+                      <rect x="2" y="2" width="15" height="8" rx="2" fill="white"/>
+                      <path d="M22 4.5v3a1.5 1.5 0 000-3z" fill="white" fillOpacity="0.4"/>
                     </svg>
                   </div>
                 </div>

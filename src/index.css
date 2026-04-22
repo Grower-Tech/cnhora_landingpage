@@ -724,99 +724,109 @@ body {
   z-index: 2;
 }
 
-/* ── Phone mockup (iPhone 15 Pro style) ── */
+/* ── Phone mockup (iPhone 17 Pro Max — Natural Titanium) ── */
 
-/* Outer frame wrapper — titanium-style metallic border */
+/* Outer frame — Natural Titanium with directional brushed-metal gradient */
 .phone-mockup {
   width: 300px;
   height: 630px;
   position: relative;
   flex-shrink: 0;
-  border-radius: 54px;
-  /* Titanium gradient frame */
+  border-radius: 44px;
   background: linear-gradient(
-    145deg,
-    #6e6e73 0%,
-    #3a3a3c 20%,
-    #2c2c2e 40%,
-    #3a3a3c 60%,
-    #6e6e73 80%,
-    #48484a 100%
+    165deg,
+    #d2d2d6 0%,
+    #a8a8ad 8%,
+    #7e7e83 18%,
+    #4c4c50 32%,
+    #2e2e30 48%,
+    #3a3a3c 58%,
+    #626266 70%,
+    #909094 82%,
+    #bababf 91%,
+    #d6d6da 100%
   );
   padding: 3px;
-  /* Outer shadows for depth and ambient lighting */
   box-shadow:
-    0 40px 120px rgba(0, 0, 0, 0.85),
-    0 15px 40px rgba(0, 0, 0, 0.5),
-    0 0 60px rgba(0, 100, 255, 0.12),
-    0 0 30px rgba(255, 107, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 0 0 0.5px rgba(0, 0, 0, 0.55),
+    0 60px 180px rgba(0, 0, 0, 0.95),
+    0 28px 80px  rgba(0, 0, 0, 0.7),
+    0 12px 35px  rgba(0, 0, 0, 0.45),
+    0 0 80px rgba(0, 80, 200, 0.18),
+    0 0 40px rgba(255, 100, 0, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* Left side buttons — silent switch + 2 volume */
+/* Mute / silent switch — left side */
 .phone-mockup::before {
   content: '';
   position: absolute;
-  top: 118px;
+  top: 120px;
   left: -5px;
   width: 4px;
-  height: 30px;
-  background: linear-gradient(180deg, #5a5a5c, #3a3a3c);
+  height: 28px;
+  background: linear-gradient(180deg, #8a8a8f 0%, #4e4e52 50%, #3a3a3c 100%);
   border-radius: 3px 0 0 3px;
-  /* Volume up + volume down via box-shadow */
-  box-shadow:
-    0 45px 0 4px #3a3a3c,
-    0 45px 0 4px #3a3a3c,
-    0 88px 0 linear-gradient(180deg, #5a5a5c, #3a3a3c);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
+
+/* Volume buttons — left side */
 .phone-btn-vol-up,
 .phone-btn-vol-down {
   position: absolute;
   left: -5px;
   width: 4px;
-  background: linear-gradient(180deg, #5a5a5c, #3a3a3c);
+  background: linear-gradient(180deg, #8a8a8f 0%, #4e4e52 50%, #3a3a3c 100%);
   border-radius: 3px 0 0 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
-.phone-btn-vol-up  { top: 163px; height: 36px; }
-.phone-btn-vol-down { top: 207px; height: 36px; }
+.phone-btn-vol-up   { top: 165px; height: 38px; }
+.phone-btn-vol-down { top: 212px; height: 38px; }
 
-/* Right side button — power */
+/* Power button — right side */
 .phone-mockup::after {
   content: '';
   position: absolute;
-  top: 175px;
+  top: 178px;
   right: -5px;
   width: 4px;
-  height: 64px;
-  background: linear-gradient(180deg, #5a5a5c, #3a3a3c);
+  height: 68px;
+  background: linear-gradient(180deg, #8a8a8f 0%, #4e4e52 50%, #3a3a3c 100%);
   border-radius: 0 3px 3px 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* Inner glass body */
 .phone-inner {
   width: 100%;
   height: 100%;
-  border-radius: 52px;
+  border-radius: 41px;
   background: #000;
   overflow: hidden;
   position: relative;
-  display: flex;
-  flex-direction: column;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    inset 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
-/* Status bar row */
+/* Status bar — floats over full-bleed screen, same as real iPhone */
 .phone-status-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 28px 0;
+  padding: 0 20px;
   height: 52px;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  /* subtle scrim so white text stays readable over any screen color */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.28) 0%, transparent 100%);
 }
 .phone-status-time {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #fff;
   letter-spacing: -0.3px;
@@ -825,30 +835,51 @@ body {
 .phone-status-icons {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   color: #fff;
 }
 
-/* Dynamic Island */
+/* Dynamic Island — scaled to 300px mockup (32% of 294px inner width) */
 .phone-dynamic-island {
   position: absolute;
-  top: 14px;
+  top: 9px;
   left: 50%;
   transform: translateX(-50%);
-  width: 126px;
-  height: 37px;
+  width: 100px;
+  height: 34px;
   background: #000;
-  border-radius: 20px;
+  border-radius: 18px;
   z-index: 10;
-  box-shadow: 0 0 0 2px #000;
+  box-shadow:
+    0 0 0 1.5px rgba(0, 0, 0, 0.9),
+    inset 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
-/* Screen area (fills remaining height) */
+/* Screen area — full bleed, fills entire phone-inner behind DI and status bar */
 .phone-screen-area {
-  position: relative;
-  flex: 1;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
-  border-radius: 0 0 52px 52px;
+  border-radius: 41px;
+}
+
+/* Screen glass-sheen reflection overlay */
+.phone-screen-area::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.025) 35%,
+    transparent 60%
+  );
+  z-index: 50;
+  pointer-events: none;
+  border-radius: 0;
 }
 
 /* Each topic screen — absolute stacked, crossfaded by GSAP */
@@ -867,6 +898,7 @@ body {
   align-items: center;
   padding: 14px 20px 12px;
   flex-shrink: 0;
+  margin-top: 52px; /* clears the floating status bar */
 }
 .screen-app-bar-title {
   font-size: 17px;
