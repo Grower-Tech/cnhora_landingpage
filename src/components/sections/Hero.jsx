@@ -41,6 +41,32 @@ const SHOWCASE_TOPICS = [
     gradient: 'linear-gradient(135deg, #003366 0%, #002244 100%)',
     screenIcon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z',
     screenLabel: 'Área da Aula',
+    screenContent: (
+      <>
+        <div className="screen-app-bar" style={{ background: 'rgba(0,30,60,0.95)' }}>
+          <div className="screen-app-bar-back" />
+          <span className="screen-app-bar-title">Área da Aula</span>
+        </div>
+        <div className="screen-map" style={{ background: 'linear-gradient(180deg, #001e3c 0%, #002a52 100%)' }}>
+          <div className="screen-map-grid" />
+          <div className="screen-map-road-h" style={{ top: '38%', left: '10%', right: '10%' }} />
+          <div className="screen-map-road-h" style={{ top: '62%', left: '5%', right: '5%' }} />
+          <div className="screen-map-road-v" style={{ left: '35%', top: '10%', bottom: '10%' }} />
+          <div className="screen-map-road-v" style={{ left: '65%', top: '10%', bottom: '10%' }} />
+          <div className="screen-pin-marker">
+            <div className="screen-pin-dot" />
+            <div className="screen-pin-shadow" />
+          </div>
+        </div>
+        <div className="screen-bottom-card">
+          <div className="screen-card-title">Rua das Acácias, 42</div>
+          <div className="screen-card-row">
+            <span className="screen-tag screen-tag-orange">Aula às 14h</span>
+            <span className="screen-tag screen-tag-blue">15 min</span>
+          </div>
+        </div>
+      </>
+    ),
   },
   {
     titleParts: ['Veja onde você ', 'errou', ', para não errar de novo'],
@@ -48,6 +74,30 @@ const SHOWCASE_TOPICS = [
     gradient: 'linear-gradient(135deg, #1a0533 0%, #0d0222 100%)',
     screenIcon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7',
     screenLabel: 'Mapa de Erros',
+    screenContent: (
+      <>
+        <div className="screen-app-bar" style={{ background: 'rgba(18,0,32,0.95)' }}>
+          <div className="screen-app-bar-back" />
+          <span className="screen-app-bar-title">Mapa de Erros</span>
+        </div>
+        <div className="screen-map" style={{ background: 'linear-gradient(180deg, #120020 0%, #1a0030 100%)' }}>
+          <div className="screen-map-grid" />
+          <div className="screen-map-road-h" style={{ top: '45%', left: '5%', right: '5%' }} />
+          <div className="screen-map-road-v" style={{ left: '50%', top: '5%', bottom: '5%' }} />
+          <div className="screen-error-pin" style={{ background: '#FF3B30', top: '30%', left: '30%' }} />
+          <div className="screen-error-pin" style={{ background: '#FF9500', top: '55%', left: '60%' }} />
+          <div className="screen-error-pin" style={{ background: '#FF3B30', top: '65%', left: '25%' }} />
+          <div className="screen-error-pin" style={{ background: '#FF9500', top: '25%', left: '65%' }} />
+        </div>
+        <div className="screen-bottom-card">
+          <div className="screen-card-title">Últimos erros registrados</div>
+          <div className="screen-card-row">
+            <span className="screen-tag" style={{ background: 'rgba(255,59,48,0.2)', color: '#FF6B6B' }}>4 erros</span>
+            <span className="screen-tag screen-tag-blue">Zona Sul</span>
+          </div>
+        </div>
+      </>
+    ),
   },
   {
     titleParts: ['Painel ', 'financeiro', ' completo'],
@@ -55,6 +105,43 @@ const SHOWCASE_TOPICS = [
     gradient: 'linear-gradient(135deg, #1a2a00 0%, #0d1500 100%)',
     screenIcon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
     screenLabel: 'Financeiro',
+    screenContent: (
+      <>
+        <div className="screen-app-bar" style={{ background: 'rgba(10,18,0,0.95)' }}>
+          <div className="screen-app-bar-back" />
+          <span className="screen-app-bar-title">Financeiro</span>
+        </div>
+        <div className="screen-finance-balance">
+          <div className="screen-balance-label">Saldo disponível</div>
+          <div className="screen-balance-value">R$ 2.840</div>
+          <div className="screen-balance-change">↑ +R$ 360 esta semana</div>
+        </div>
+        <div className="screen-divider" />
+        <div className="screen-tx-list">
+          <div className="screen-tx-item">
+            <div className="screen-tx-info">
+              <div className="screen-tx-label">Aula confirmada</div>
+              <div className="screen-tx-sub">Hoje, 14:00</div>
+            </div>
+            <div className="screen-tx-amount positive">+R$ 180</div>
+          </div>
+          <div className="screen-tx-item">
+            <div className="screen-tx-info">
+              <div className="screen-tx-label">Pagamento recebido</div>
+              <div className="screen-tx-sub">Ontem</div>
+            </div>
+            <div className="screen-tx-amount positive">+R$ 360</div>
+          </div>
+          <div className="screen-tx-item">
+            <div className="screen-tx-info">
+              <div className="screen-tx-label">Aula agendada</div>
+              <div className="screen-tx-sub">Amanhã, 10:00</div>
+            </div>
+            <div className="screen-tx-amount pending">R$ 180</div>
+          </div>
+        </div>
+      </>
+    ),
   },
 ];
 
@@ -525,21 +612,56 @@ const Hero = () => {
           </div>
           <div className="showcase-layout">
             <div className="phone-mockup">
-              <div className="phone-notch" />
-              <div className="phone-screen-area">
-                {SHOWCASE_TOPICS.map((topic, i) => (
-                  <div
-                    key={i}
-                    ref={el => showcaseScreenRefs.current[i] = el}
-                    className="phone-screen-item"
-                    style={{ background: topic.gradient }}
-                  >
-                    <svg className="screen-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={topic.screenIcon} />
+              {/* Side buttons */}
+              <div className="phone-btn-vol-up" />
+              <div className="phone-btn-vol-down" />
+
+              {/* Inner glass */}
+              <div className="phone-inner">
+
+                {/* Status bar */}
+                <div className="phone-status-bar">
+                  <span className="phone-status-time">9:41</span>
+                  <div className="phone-status-icons">
+                    {/* Signal bars */}
+                    <svg width="17" height="12" viewBox="0 0 17 12" fill="white">
+                      <rect x="0" y="6" width="3" height="6" rx="1"/>
+                      <rect x="4.5" y="4" width="3" height="8" rx="1"/>
+                      <rect x="9" y="2" width="3" height="10" rx="1"/>
+                      <rect x="13.5" y="0" width="3" height="12" rx="1"/>
                     </svg>
-                    <span className="screen-label">{topic.screenLabel}</span>
+                    {/* WiFi */}
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+                      <circle cx="8" cy="10.5" r="1.5" fill="white"/>
+                      <path d="M5 7.5a4.5 4.5 0 016 0" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                      <path d="M2 4.5a8 8 0 0112 0" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    {/* Battery */}
+                    <svg width="26" height="12" viewBox="0 0 26 12" fill="none">
+                      <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" strokeOpacity="0.35"/>
+                      <rect x="2" y="2" width="16" height="8" rx="2" fill="white"/>
+                      <path d="M23 4.5v3a1.5 1.5 0 000-3z" fill="white" fillOpacity="0.4"/>
+                    </svg>
                   </div>
-                ))}
+                </div>
+
+                {/* Dynamic Island */}
+                <div className="phone-dynamic-island" />
+
+                {/* Screen area — crossfaded by GSAP */}
+                <div className="phone-screen-area">
+                  {SHOWCASE_TOPICS.map((topic, i) => (
+                    <div
+                      key={i}
+                      ref={el => showcaseScreenRefs.current[i] = el}
+                      className="phone-screen-item"
+                      style={{ background: topic.gradient }}
+                    >
+                      {topic.screenContent}
+                    </div>
+                  ))}
+                </div>
+
               </div>
             </div>
             <div className="showcase-text-panel">
