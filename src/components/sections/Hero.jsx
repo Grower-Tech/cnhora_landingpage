@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import cnhoraLogo from '/cnhora-logo.svg';
 import Features from './Features';
+import Footer from '../layout/Footer';
 import { isWebGLSupported } from '../../utils';
 import { useDevicePerformance } from '../../hooks';
 
@@ -211,7 +212,10 @@ const Hero = () => {
   const isStaticMotion = animationLevel === 'static';
   const isReducedMotion = animationLevel === 'reduced';
   const enableFullMotion = animationLevel === 'full';
-  const useStackedLayout = true;
+  const useStackedLayout = false;
+  const isStackedDisplay = isMobile || useStackedLayout;
+  const isStaticDesktop = isStaticMotion && !isMobile;
+  const useColumnLayout = isStackedDisplay;
   const enableParticles = webglOk && !isMobile && deviceProfile.shouldUseWebGL;
   const heroRef = useRef(null);
   const canvasRef = useRef(null);
@@ -236,6 +240,7 @@ const Hero = () => {
   const ctaTitleRef = useRef(null);
   const ctaTextRef = useRef(null);
   const ctaButtonsRef = useRef(null);
+  const footerRef = useRef(null);
 
   const goToCards = (tab) => {
     setActiveTab(tab);
@@ -374,6 +379,7 @@ const Hero = () => {
           ctaTitleRef.current,
           ctaTextRef.current,
           ctaButtonsRef.current,
+          footerRef.current,
         ].filter(Boolean),
         {
           opacity: 1,
@@ -499,6 +505,8 @@ const Hero = () => {
     gsap.set(ctaTitleRef.current, { opacity: 0, y: 40 });
     gsap.set(ctaTextRef.current, { opacity: 0, y: 35 });
     gsap.set(ctaButtonsRef.current, { opacity: 0, y: 30 });
+    const footerH = footerRef.current ? footerRef.current.offsetHeight : 200;
+    gsap.set(footerRef.current, { opacity: 0, y: footerH });
     showcaseScreenRefs.current.forEach((el, i) => {
       if (el) gsap.set(el, { opacity: i === 0 ? 1 : 0 });
     });
@@ -510,7 +518,7 @@ const Hero = () => {
       scrollTrigger: {
         trigger: hero,
         start: 'top top',
-        end: '+=680%',
+        end: '+=800%',
         scrub: isReducedMotion ? true : 0.9,
         pin: true,
         pinSpacing: true,
@@ -603,8 +611,19 @@ const Hero = () => {
     tl.to(ctaTextRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 19);
     tl.to(ctaButtonsRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 19.5);
 
+    // CTA shows centered (position 21). Footer + lift start at 22 so user sees CTA centered first.
+    tl.to(footerRef.current, { opacity: 1, y: 0, duration: 2, ease: 'power2.out' }, 22);
+    tl.to(ctaRef.current, { y: -(footerH / 2 + 32), duration: 2, ease: 'power2.out' }, 22);
+
     // End pad
-    tl.to({}, { duration: 1 }, 22);
+    tl.to({}, { duration: 1 }, 25);
+
+    // Scroll indicator: fade out as hero scrolls, show during Features phase only
+    if (indicatorRef.current) {
+      tl.to(indicatorRef.current, { opacity: 0, duration: 1, ease: 'power2.in' }, 0);
+      tl.to(indicatorRef.current, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 5);
+      tl.to(indicatorRef.current, { opacity: 0, duration: 0.5, ease: 'power2.in' }, 7.5);
+    }
 
     // Enable pointer events appropriately
     const cardsTrigger = ScrollTrigger.create({
@@ -630,12 +649,23 @@ const Hero = () => {
 
     const ctaTrigger = ScrollTrigger.create({
       trigger: hero,
-      start: '+=870%',
+      start: '+=580%',
       onEnter: () => {
         if (ctaRef.current) ctaRef.current.style.pointerEvents = 'auto';
       },
       onLeaveBack: () => {
         if (ctaRef.current) ctaRef.current.style.pointerEvents = 'none';
+      }
+    });
+
+    const footerTrigger = ScrollTrigger.create({
+      trigger: hero,
+      start: '+=700%',
+      onEnter: () => {
+        if (footerRef.current) footerRef.current.style.pointerEvents = 'auto';
+      },
+      onLeaveBack: () => {
+        if (footerRef.current) footerRef.current.style.pointerEvents = 'none';
       }
     });
 
@@ -657,6 +687,7 @@ const Hero = () => {
       cardsTrigger.kill();
       showcaseTrigger.kill();
       ctaTrigger.kill();
+      footerTrigger.kill();
       if (enableFullMotion) {
         document.removeEventListener('mousemove', onParallax);
       }
@@ -699,7 +730,7 @@ const Hero = () => {
 
   /* ─── Progress bar + scroll indicator ─── */
   useEffect(() => {
-    if (isMobile || isStaticMotion) return;
+    if (isMobile) return;
 
     const onScroll = () => {
       const scrollTop = window.scrollY;
@@ -707,13 +738,19 @@ const Hero = () => {
       if (progressRef.current) {
         progressRef.current.style.width = ((scrollTop / docHeight) * 100) + '%';
       }
-      if (indicatorRef.current) {
-        indicatorRef.current.style.opacity = scrollTop > 200 ? '0' : '1';
+      // Static desktop: indicator is fixed; show only during Hero and Features sections
+      if (isStaticDesktop && indicatorRef.current) {
+        const vh = window.innerHeight;
+        const sectionIndex = Math.floor(scrollTop / vh);
+        const posInSection = scrollTop % vh;
+        const inHeroOrFeatures = sectionIndex < 2;
+        indicatorRef.current.style.opacity = (inHeroOrFeatures && posInSection < 80) ? '1' : '0';
       }
+      // Non-static: GSAP timeline controls indicator opacity via scrub tweens
     };
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
-  }, [isMobile, isStaticMotion]);
+  }, [isMobile, isStaticDesktop]);
 
   return (
     <>
@@ -723,19 +760,38 @@ const Hero = () => {
       {/* ─── Pinned hero section ─── */}
       <section
         ref={heroRef}
-        className={`hero-motion-${animationLevel} hero-vertical-flow`}
+        className={`hero-motion-${animationLevel}${useColumnLayout ? ' hero-vertical-flow' : ''}${isStaticDesktop ? ' hero-static-desktop' : ''}`}
         style={{
-          height: useStackedLayout ? 'auto' : '100vh',
-          minHeight: useStackedLayout ? '100svh' : '100vh',
+          height: (useColumnLayout || isStaticDesktop) ? 'auto' : '100vh',
+          minHeight: (useColumnLayout || isStaticDesktop) ? '100svh' : '100vh',
           position: 'relative',
-          overflow: useStackedLayout ? 'visible' : 'hidden',
+          overflow: (useColumnLayout || isStaticDesktop) ? 'visible' : 'hidden',
           display: 'flex',
-          flexDirection: useStackedLayout ? 'column' : 'row',
-          alignItems: useStackedLayout ? 'stretch' : 'center',
-          justifyContent: useStackedLayout ? 'flex-start' : 'center',
+          flexDirection: (useColumnLayout || isStaticDesktop) ? 'column' : 'row',
+          alignItems: (useColumnLayout || isStaticDesktop) ? 'stretch' : 'center',
+          justifyContent: (useColumnLayout || isStaticDesktop) ? 'flex-start' : 'center',
           background: 'radial-gradient(ellipse 80% 60% at 50% 50%, #003366 0%, #001428 50%, #000810 100%)',
         }}
       >
+        {/* Spacer: holds 100vh so absolute hero content shows; sections flow below */}
+        {isStaticDesktop && (
+          <div style={{ minHeight: '100vh', flexShrink: 0, position: 'relative' }}>
+            <PerspectiveGrid ref={gridRef} />
+            <div
+              ref={indicatorRef}
+              style={{
+                position: 'fixed', bottom: '2.5rem', left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: '0.75rem', zIndex: 10, pointerEvents: 'none',
+              }}
+            >
+              <div className="scroll-mouse"><div className="scroll-wheel" /></div>
+              <span className="scroll-text">Role para explorar</span>
+            </div>
+          </div>
+        )}
+
         {/* Three.js canvas */}
         {enableParticles && (
           <canvas
@@ -751,7 +807,7 @@ const Hero = () => {
         <div className="ambient-light" style={{ zIndex: 2 }} />
 
         {/* Perspective grid */}
-        <PerspectiveGrid ref={gridRef} />
+        {!isStaticDesktop && <PerspectiveGrid ref={gridRef} />}
 
         {/* Animation Group (Logo + Rings) - Positioned Right */}
         <div ref={animGroupRef} className="hero-animation-group">
@@ -794,7 +850,7 @@ const Hero = () => {
         </div>
 
         {/* Features section — tab switcher + cards */}
-        <div style={{ order: useStackedLayout ? 2 : undefined, width: useStackedLayout ? '100%' : undefined }}>
+        <div style={{ order: useColumnLayout ? 2 : undefined, width: useColumnLayout ? '100%' : undefined }}>
           <Features
             ref={cardsContainerRef}
             activeTab={activeTab}
@@ -804,7 +860,7 @@ const Hero = () => {
         </div>
 
         {/* AppShowcase — animated in by Hero timeline */}
-        <div ref={showcaseRef} className="showcase-in-hero" style={{ order: useStackedLayout ? 3 : undefined }}>
+        <div ref={showcaseRef} className="showcase-in-hero" style={{ order: useColumnLayout ? 3 : undefined }}>
           <div className="showcase-header">
             <h2>O app que <span className="highlight">trabalha</span> por você</h2>
             <p>Três funcionalidades que mudam como alunos e instrutores vivem a habilitação.</p>
@@ -926,7 +982,7 @@ const Hero = () => {
         </div>
 
         {/* CTA Download Section — animated in after AppShowcase */}
-        <div ref={ctaRef} className="cta-download-section" style={{ order: useStackedLayout ? 4 : undefined }}>
+        <div ref={ctaRef} className="cta-download-section" style={{ order: useColumnLayout ? 4 : undefined }}>
 
           {/* Animated logo with orbital rings */}
           <div ref={ctaLogoRef} className="cta-logo-wrapper">
@@ -988,8 +1044,17 @@ const Hero = () => {
 
         </div>
 
+        {/* Footer — animated in after CTA on desktop; stacked on mobile */}
+        <div
+          ref={footerRef}
+          className="footer-in-hero"
+          style={{ order: useColumnLayout ? 5 : undefined }}
+        >
+          <Footer />
+        </div>
+
         {/* Main hero content - Positioned Left */}
-        <div ref={finalRef} className="hero-content-wrapper" style={{ order: useStackedLayout ? 1 : undefined }}>
+        <div ref={finalRef} className="hero-content-wrapper" style={{ order: useColumnLayout ? 1 : undefined }}>
           {/* Badge */}
           <div className="hero-badge">
             <span className="dot" />
@@ -1064,6 +1129,22 @@ const Hero = () => {
             </div>
           </div>
         </div>
+
+        {/* Scroll indicator — full/reduced desktop only (static uses the one inside the spacer) */}
+        {!isMobile && !isStaticDesktop && (
+          <div
+            ref={indicatorRef}
+            style={{
+              position: 'absolute', bottom: '2.5rem', left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              gap: '0.75rem', zIndex: 10, pointerEvents: 'none',
+            }}
+          >
+            <div className="scroll-mouse"><div className="scroll-wheel" /></div>
+            <span className="scroll-text">Role para explorar</span>
+          </div>
+        )}
       </section>
     </>
   );

@@ -2017,6 +2017,10 @@ html.perf-static .hero-cards-grid {
   gap: 1rem;
 }
 
+html.perf-static .hero-cards-grid .hero-feature-card {
+  opacity: 1 !important;
+}
+
 html.perf-static .hero-feature-card,
 html.perf-static .showcase-mobile-card,
 html.perf-static .hero-tab-switcher,
@@ -2296,6 +2300,196 @@ html.perf-static .cta-download-section {
   .hero-vertical-flow .showcase-mobile-cards {
     display: grid !important;
   }
+}
+
+/* ===== DESKTOP STATIC: absolute overlays become normal flow below the spacer ===== */
+
+/* Base rules (may be overridden by html.perf-static below) */
+.hero-static-desktop .hero-animation-group {
+  top: 0 !important;
+  height: 100vh !important;
+}
+
+.hero-static-desktop .hero-content-wrapper {
+  top: 0 !important;
+  height: 100vh !important;
+  justify-content: center !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.hero-static-desktop .showcase-in-hero {
+  position: relative !important;
+  inset: auto !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.hero-static-desktop .cta-download-section {
+  position: relative !important;
+  inset: auto !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: min(100%, 860px);
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5rem) 2rem;
+}
+
+.hero-static-desktop .footer-in-hero {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  pointer-events: auto !important;
+}
+
+/* html.perf-static specificity overrides — beat html.perf-static rules (0-2-1) that force mobile layout */
+html.perf-static .hero-static-desktop .hero-animation-group {
+  position: absolute !important;
+  right: 12% !important;
+  top: 0 !important;
+  width: 42% !important;
+  height: 100vh !important;
+  min-height: unset !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  order: unset !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+html.perf-static .hero-static-desktop .hero-content-wrapper {
+  position: absolute !important;
+  left: 15% !important;
+  top: 0 !important;
+  width: 42% !important;
+  height: 100vh !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+  justify-content: center !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+html.perf-static .hero-static-desktop .hero-title,
+html.perf-static .hero-static-desktop .hero-subtitle,
+html.perf-static .hero-static-desktop .stats-row,
+html.perf-static .hero-static-desktop .btn-cta-group,
+html.perf-static .hero-static-desktop .trust-badges {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+}
+
+html.perf-static .hero-static-desktop .logo-container {
+  width: 280px !important;
+  height: 280px !important;
+}
+
+html.perf-static .hero-static-desktop .hero-animation-group .orbital-ring.ring-1 {
+  width: 380px !important;
+  height: 360px !important;
+}
+
+html.perf-static .hero-static-desktop .hero-animation-group .orbital-ring.ring-2 {
+  width: 460px !important;
+  height: 440px !important;
+}
+
+html.perf-static .hero-static-desktop .ring-3 {
+  display: block !important;
+}
+
+html.perf-static .hero-static-desktop .showcase-in-hero {
+  position: relative !important;
+  inset: auto !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: min(100%, 900px) !important;
+  min-height: 100vh !important;
+  margin: 0 auto !important;
+  padding: 4rem 1rem !important;
+  order: unset !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+html.perf-static .hero-static-desktop .showcase-layout .phone-mockup,
+html.perf-static .hero-static-desktop .showcase-layout .showcase-text-panel {
+  display: block !important;
+}
+
+html.perf-static .hero-static-desktop .showcase-mobile-cards {
+  display: none !important;
+}
+
+html.perf-static .hero-static-desktop .cta-download-section {
+  position: relative !important;
+  inset: auto !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: min(100%, 860px) !important;
+  min-height: 100vh !important;
+  margin: 0 auto !important;
+  padding: 4rem 2rem !important;
+  order: unset !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+html.perf-static .hero-static-desktop .footer-in-hero {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  pointer-events: auto !important;
+}
+
+html.perf-static .hero-static-desktop .hero-cards-container {
+  width: min(100%, 1140px) !important;
+  min-height: 100vh !important;
+  padding: 4rem 2rem !important;
+}
+
+html.perf-static .hero-static-desktop .hero-cards-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1.5rem !important;
+}
+
+html.perf-static .hero-static-desktop .hero-feature-card {
+  width: 100% !important;
+  min-height: 400px !important;
+}
+
+/* ===== FOOTER IN HERO (desktop: absolute overlay; mobile: stacked) ===== */
+
+.footer-in-hero {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.footer-in-hero .site-footer {
+  width: 100%;
+  pointer-events: auto;
+}
+
+.hero-vertical-flow .footer-in-hero {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  display: block !important;
+  pointer-events: auto !important;
 }
 
 /* ===== FOOTER + LEGAL MODAL ===== */
