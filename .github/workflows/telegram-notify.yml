@@ -13,47 +13,30 @@ jobs:
     continue-on-error: true
 
     steps:
-      - name: Teste mínimo de envio para Telegram
+      - name: Teste mínimo Telegram
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          echo "=== DEBUG TELEGRAM WORKFLOW ==="
-          echo "BOT_TOKEN length: ${#BOT_TOKEN} caracteres"
-          echo "CHAT_ID: $CHAT_ID"
-          echo "=============================="
+          echo "=== DEBUG TELEGRAM ==="
+          echo "BOT_TOKEN length : ${#BOT_TOKEN}"
+          echo "CHAT_ID           : '$CHAT_ID'"
+          echo "======================"
 
-          echo "Instalando jq..."
           sudo apt-get update -qq && sudo apt-get install -y jq
-
-          echo "jq instalado. Versão: $(jq --version)"
 
           echo "Montando JSON..."
           JSON=$(jq -n \
             --arg chat_id "$CHAT_ID" \
-            --arg text "Teste do GitHub Actions - Landing Page" \
+            --arg text "Teste mínimo - Landing Page" \
             '{chat_id: $chat_id, text: $text, parse_mode: "HTML", disable_web_page_preview: true}')
 
-          echo "JSON montado com sucesso."
-          echo "Enviando requisição para Telegram..."
+          echo "JSON montado. Enviando curl..."
 
-          RESPONSE=$(curl -v -s -w "\nHTTP_CODE:%{http_code}" -X POST \
+          # Curl com máximo de debug possível
+          curl -v -X POST \
             "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "$JSON" 2>&1)
+            -d "$JSON"
 
-          echo "=== RESPOSTA DO CURL ==="
-          echo "$RESPONSE"
-
-          HTTP_CODE=$(echo "$RESPONSE" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-          BODY=$(echo "$RESPONSE" | sed 's/HTTP_CODE:[0-9]*//')
-
-          echo "HTTP Status: $HTTP_CODE"
-          echo "Body: $BODY"
-
-          if [[ "$HTTP_CODE" == "200" ]]; then
-            echo "✅ Sucesso! Mensagem enviada."
-          else
-            echo "❌ Falha no envio"
-            exit 1
-          fi
+          echo "Curl finalizado com código: $?"
