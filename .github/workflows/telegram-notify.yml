@@ -19,28 +19,34 @@ jobs:
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           echo "Iniciando teste mínimo..."
-
+          
+          # Check if jq is available
+          if ! command -v jq &> /dev/null; then
+            echo "❌ jq is not installed"
+            exit 1
+          fi
+          
           # Monta o JSON de forma segura usando jq
           JSON=$(jq -n \
             --arg chat_id "$CHAT_ID" \
             --arg text "Teste mínimo do GitHub Actions - Landing Page\n\nFuncionou! ✅" \
             '{chat_id: $chat_id, text: $text, parse_mode: "HTML", disable_web_page_preview: true}')
-
-          RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+          
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
             "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "$JSON")
-
-          HTTP_CODE=${RESPONSE: -3}
-          BODY=${RESPONSE:0:-3}
-
+          
+          # Extract HTTP code (last line) and body (all but last line)
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
           echo "HTTP Status: $HTTP_CODE"
-          echo "Resposta completa: $BODY"
-
+          echo "Resposta: $BODY"
+          
           if [[ "$HTTP_CODE" == "200" ]]; then
             echo "✅ Mensagem enviada com sucesso!"
           else
             echo "❌ Falha no envio"
-            echo "Resposta completa: $BODY"
             exit 1
           fi
