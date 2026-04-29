@@ -13,20 +13,27 @@ jobs:
     continue-on-error: true
 
     steps:
-      - name: Teste simples de notificação
+          - name: Teste mínimo de envio para Telegram
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          echo "BOT_TOKEN existe? ${BOT_TOKEN:+SIM}"
-          echo "CHAT_ID existe?   ${CHAT_ID:+SIM}"
-          
-          if [[ -n "$BOT_TOKEN" && -n "$CHAT_ID" ]]; then
-            echo "✅ As duas secrets estão configuradas corretamente."
-            curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-              -H "Content-Type: application/json" \
-              -d "{\"chat_id\": \"${CHAT_ID}\", \"text\": \"Teste simples do GitHub Actions - Landing Page\", \"parse_mode\": \"HTML\"}"
-            echo "Mensagem de teste enviada."
+          echo "Iniciando teste mínimo..."
+
+          RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+            "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\": \"${CHAT_ID}\", \"text\": \"Teste mínimo do GitHub Actions - Landing Page\n\nFuncionou! ✅\", \"parse_mode\": \"HTML\", \"disable_web_page_preview\": true}")
+
+          HTTP_CODE=${RESPONSE: -3}
+          BODY=${RESPONSE:0:-3}
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Resposta: $BODY"
+
+          if [[ "$HTTP_CODE" == "200" ]]; then
+            echo "✅ Mensagem enviada com sucesso!"
           else
-            echo "❌ Alguma secret está faltando."
+            echo "❌ Falha no envio"
+            exit 1
           fi
