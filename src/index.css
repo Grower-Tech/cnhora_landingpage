@@ -2784,3 +2784,77 @@ html.perf-static .hero-static-desktop .hero-feature-card {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── WhatsApp Traffic Sign ── */
+
+.whatsapp-sign-wrapper {
+  position: fixed;
+  bottom: 2rem; /* overridden by inline style from JS; kept as no-JS fallback */
+  right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: bottom 0.35s ease;
+}
+
+/* Circular traffic-sign face */
+.whatsapp-sign {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(0, 20, 50, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 3px solid #FF6B00;
+  box-shadow:
+    0 0 0 5px rgba(255, 107, 0, 0.15),
+    0 0 0 8px rgba(255, 107, 0, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.whatsapp-sign:hover {
+  border-color: #25D366;
+  box-shadow:
+    0 0 0 5px rgba(37, 211, 102, 0.2),
+    0 0 0 8px rgba(37, 211, 102, 0.07),
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    0 0 32px rgba(37, 211, 102, 0.35);
+}
+
+.whatsapp-sign:focus-visible {
+  outline: 3px solid #25D366;
+  outline-offset: 4px;
+}
+
+/* Traffic sign arm — horizontal, pointing right toward screen edge */
+.whatsapp-sign-post {
+  width: 20px;
+  height: 4px;
+  background: linear-gradient(to right, #FF6B00, rgba(255, 107, 0, 0.2));
+  flex-shrink: 0;
+}
+
+/* Wall bracket — small vertical piece at the right edge */
+.whatsapp-sign-base {
+  width: 4px;
+  height: 20px;
+  border-radius: 2px;
+  background: rgba(255, 107, 0, 0.35);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .whatsapp-sign {
+    width: 60px;
+    height: 60px;
+  }
+}

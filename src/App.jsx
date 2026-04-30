@@ -1,15 +1,17 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Hero from './components/sections/Hero';
-import { ErrorBoundary } from './components/ui';
+import { ErrorBoundary, WhatsAppSign } from './components/ui';
 import Privacidade from './pages/Privacidade';
 import LGPD from './pages/LGPD';
 import Termos from './pages/Termos';
 
 function App() {
+  const location = useLocation();
+
   return (
     <div className="dark" style={{ background: '#000810' }}>
       <Helmet>
@@ -36,7 +38,8 @@ function App() {
         <Route path="/termos" element={<ErrorBoundary><Termos /></ErrorBoundary>} />
       </Routes>
 
-      <Footer />
+      {location.pathname !== '/' && <Footer />}
+      <WhatsAppSign />
     </div>
   );
 }

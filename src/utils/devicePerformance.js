@@ -38,6 +38,12 @@ export const detectDevicePerformance = () => {
     };
   }
 
+  const perfOverride = new URLSearchParams(window.location.search).get('perf');
+  if (perfOverride === 'reduced')       return { os: 'unknown', tier: 'medium', animationLevel: 'reduced', isMobile: false, isTablet: false, shouldUseWebGL: false, shouldUseScrollEffects: true,  shouldUseCssMotion: true  };
+  if (perfOverride === 'static')        return { os: 'unknown', tier: 'low',    animationLevel: 'static',  isMobile: false, isTablet: false, shouldUseWebGL: false, shouldUseScrollEffects: false, shouldUseCssMotion: false };
+  if (perfOverride === 'mobile')        return { os: 'unknown', tier: 'medium', animationLevel: 'reduced', isMobile: true,  isTablet: false, shouldUseWebGL: false, shouldUseScrollEffects: true,  shouldUseCssMotion: true  };
+  if (perfOverride === 'mobile-static') return { os: 'unknown', tier: 'low',    animationLevel: 'static',  isMobile: true,  isTablet: false, shouldUseWebGL: false, shouldUseScrollEffects: false, shouldUseCssMotion: false };
+
   const nav = window.navigator || {};
   const userAgent = nav.userAgent || '';
   const connection = getConnection();
@@ -64,7 +70,6 @@ export const detectDevicePerformance = () => {
   const highDprBudget = isMobile && pixelRatio >= 3 && (lowCores || lowMemory || memory === null);
 
   const shouldBeStatic =
-    reducedMotion ||
     constrainedNetwork ||
     veryLowMemory ||
     (isMobile && lowCores && lowMemory) ||
@@ -77,7 +82,7 @@ export const detectDevicePerformance = () => {
     isMobile ||
     isTablet ||
     lowMemory ||
-    mediumCores;
+    (mediumCores && (isMobile || isTablet));
 
   const tier = shouldBeStatic ? 'low' : shouldBeReduced ? 'medium' : 'high';
   const animationLevel = shouldBeStatic ? 'static' : shouldBeReduced ? 'reduced' : 'full';
