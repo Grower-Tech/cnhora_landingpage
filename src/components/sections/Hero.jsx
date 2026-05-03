@@ -4,11 +4,13 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import cnhoraLogo from '/cnhora-logo.svg';
 import Features from './Features';
+import Footer from '../layout/Footer';
 import { isWebGLSupported } from '../../utils';
+import { useDevicePerformance } from '../../hooks';
 
 const HeroFallback = () => (
   <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse 80% 60% at 50% 50%, #003366 0%, #001428 50%, #000810 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-    <div style={{ maxWidth: 600, textAlign: 'center', color: '#fff' }}>
+    <div style={{ maxWidth: '600px', textAlign: 'center', color: '#fff' }}>
       <div style={{ marginBottom: '1.5rem', fontSize: '0.85rem', color: '#ff6b00', fontWeight: 600, letterSpacing: '0.05em' }}>
         O marketplace da educação no trânsito
       </div>
@@ -20,8 +22,8 @@ const HeroFallback = () => (
         Agende aulas, faça simulados e conquiste sua CNH sem burocracia.
       </p>
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
-        <a href="#cta" style={{ background: '#ff6b00', color: '#fff', padding: '0.9rem 2rem', borderRadius: 8, fontWeight: 700, textDecoration: 'none', fontSize: '1rem' }}>Sou Aluno</a>
-        <a href="#instrutores" style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '0.9rem 2rem', borderRadius: 8, fontWeight: 700, textDecoration: 'none', fontSize: '1rem' }}>Sou Instrutor</a>
+        <a href="#cta" style={{ background: '#ff6b00', color: '#fff', padding: '0.9rem 2rem', borderRadius: '8px', fontWeight: 700, textDecoration: 'none', fontSize: '1rem' }}>Sou Aluno</a>
+        <a href="#instrutores" style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '0.9rem 2rem', borderRadius: '8px', fontWeight: 700, textDecoration: 'none', fontSize: '1rem' }}>Sou Instrutor</a>
       </div>
       <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
         <span><strong style={{ color: '#fff', fontSize: '1.2rem' }}>+12k</strong><br />Alunos aprovados</span>
@@ -199,12 +201,22 @@ const PerspectiveGrid = React.forwardRef((_, ref) => (
 ));
 
 /* ─── Main Hero component ─── */
-const Hero = ({ onPinEnd, onPinEnterBack }) => {
+const Hero = () => {
+  const deviceProfile = useDevicePerformance();
   const [webglOk, setWebglOk] = useState(() => isWebGLSupported());
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 1024px)').matches : false
   );
   const [activeTab, setActiveTab] = useState('aluno');
+  const animationLevel = deviceProfile.animationLevel;
+  const isStaticMotion = animationLevel === 'static';
+  const isReducedMotion = animationLevel === 'reduced';
+  const enableFullMotion = animationLevel === 'full';
+  const useStackedLayout = false;
+  const isStackedDisplay = isMobile || useStackedLayout;
+  const isStaticDesktop = isStaticMotion && !isMobile;
+  const useColumnLayout = isStackedDisplay;
+  const enableParticles = webglOk && !isMobile && deviceProfile.shouldUseWebGL;
   const heroRef = useRef(null);
   const canvasRef = useRef(null);
   const logoRef = useRef(null);
@@ -228,18 +240,15 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
   const ctaTitleRef = useRef(null);
   const ctaTextRef = useRef(null);
   const ctaButtonsRef = useRef(null);
+  const footerRef = useRef(null);
 
   const goToCards = (tab) => {
     setActiveTab(tab);
-    if (isMobile && cardsContainerRef.current) {
+    if (cardsContainerRef.current) {
       const cardsTop = cardsContainerRef.current.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({ top: cardsTop - 84, behavior: 'smooth' });
       return;
     }
-    const heroTop = heroRef.current
-      ? heroRef.current.getBoundingClientRect().top + window.scrollY
-      : 0;
-    window.scrollTo({ top: heroTop + window.innerHeight * 2.8, behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -264,7 +273,7 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
 
   /* ─── Three.js particles ─── */
   useEffect(() => {
-    if (!webglOk || isMobile) return;
+    if (!enableParticles) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -277,7 +286,7 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
       setWebglOk(false);
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     const scene = new THREE.Scene();
@@ -350,10 +359,62 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
       geo.dispose();
       mat.dispose();
     };
-  }, [webglOk, isMobile]);
+  }, [enableParticles]);
 
   /* ─── GSAP scroll timeline ─── */
   useEffect(() => {
+    const screens = showcaseScreenRefs.current.filter(Boolean);
+    const texts = showcaseTextRefs.current.filter(Boolean);
+    const dots = showcaseDotRefs.current.filter(Boolean);
+
+    const showStaticContent = () => {
+      gsap.set(
+        [
+          finalRef.current,
+          animGroupRef.current,
+          cardsContainerRef.current,
+          showcaseRef.current,
+          ctaRef.current,
+          ctaLogoRef.current,
+          ctaTitleRef.current,
+          ctaTextRef.current,
+          ctaButtonsRef.current,
+          footerRef.current,
+        ].filter(Boolean),
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          scale: 1,
+          clearProps: 'transform,filter',
+          pointerEvents: 'auto',
+        }
+      );
+
+      if (gridRef.current) {
+        gsap.set(gridRef.current, { opacity: 0.18, clearProps: 'transform,filter' });
+      }
+
+      screens.forEach((el, i) => {
+        gsap.set(el, { opacity: i === 0 ? 1 : 0, clearProps: 'transform,filter' });
+      });
+
+      texts.forEach((el, i) => {
+        gsap.set(el, {
+          opacity: isMobile ? 1 : i === 0 ? 1 : 0,
+          y: 0,
+          clearProps: 'transform,filter',
+        });
+      });
+
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === 0));
+    };
+
+    if (useStackedLayout || isStaticMotion || (isMobile && isReducedMotion)) {
+      showStaticContent();
+      return;
+    }
+
     if (isMobile) {
       const mobileTriggers = [];
       const registerReveal = (el) => {
@@ -379,10 +440,6 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
       registerReveal(cardsContainerRef.current);
       registerReveal(showcaseRef.current);
       registerReveal(ctaRef.current);
-
-      const screens = showcaseScreenRefs.current.filter(Boolean);
-      const texts = showcaseTextRefs.current.filter(Boolean);
-      const dots = showcaseDotRefs.current.filter(Boolean);
 
       if (screens.length > 0) {
         gsap.set(screens, { opacity: 0 });
@@ -448,6 +505,8 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
     gsap.set(ctaTitleRef.current, { opacity: 0, y: 40 });
     gsap.set(ctaTextRef.current, { opacity: 0, y: 35 });
     gsap.set(ctaButtonsRef.current, { opacity: 0, y: 30 });
+    const footerH = footerRef.current ? footerRef.current.offsetHeight : 200;
+    gsap.set(footerRef.current, { opacity: 0, y: footerH });
     showcaseScreenRefs.current.forEach((el, i) => {
       if (el) gsap.set(el, { opacity: i === 0 ? 1 : 0 });
     });
@@ -459,8 +518,8 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
       scrollTrigger: {
         trigger: hero,
         start: 'top top',
-        end: '+=680%',
-        scrub: 0.9,
+        end: '+=800%',
+        scrub: isReducedMotion ? true : 0.9,
         pin: true,
         pinSpacing: true,
         anticipatePin: 1,
@@ -476,14 +535,6 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
               dot.classList.toggle('active', i === idx);
             });
           }
-        },
-        onLeave: () => {
-          gsap.set(hero, { height: 0, minHeight: 0 });
-          onPinEnd?.();
-        },
-        onEnterBack: () => {
-          gsap.set(hero, { height: '100vh', minHeight: '100vh' });
-          onPinEnterBack?.();
         },
       },
     });
@@ -516,9 +567,16 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
 
     // Stagger individual cards within the container
     cardRefs.current.forEach((card, index) => {
+      const cardFrom = isReducedMotion
+        ? { x: 120, opacity: 0, scale: 0.92 }
+        : { x: 150, opacity: 0, scale: 0.8, filter: 'blur(10px)' };
+      const cardTo = isReducedMotion
+        ? { x: 0, opacity: 1, scale: 1, ease: 'back.out(1.2)', duration: 2.5 }
+        : { x: 0, opacity: 1, scale: 1, filter: 'blur(0px)', ease: 'back.out(1.2)', duration: 2.5 };
+
       tl.fromTo(card,
-        { x: 150, opacity: 0, scale: 0.8, filter: 'blur(10px)' },
-        { x: 0, opacity: 1, scale: 1, filter: 'blur(0px)', ease: 'back.out(1.2)', duration: 2.5 },
+        cardFrom,
+        cardTo,
         3.5 + (index * 0.5)
       );
     });
@@ -553,8 +611,19 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
     tl.to(ctaTextRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 19);
     tl.to(ctaButtonsRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out' }, 19.5);
 
+    // CTA shows centered (position 21). Footer + lift start at 22 so user sees CTA centered first.
+    tl.to(footerRef.current, { opacity: 1, y: 0, duration: 2, ease: 'power2.out' }, 22);
+    tl.to(ctaRef.current, { y: -(footerH / 2 + 32), duration: 2, ease: 'power2.out' }, 22);
+
     // End pad
-    tl.to({}, { duration: 1 }, 22);
+    tl.to({}, { duration: 1 }, 25);
+
+    // Scroll indicator: fade out as hero scrolls, show during Features phase only
+    if (indicatorRef.current) {
+      tl.to(indicatorRef.current, { opacity: 0, duration: 1, ease: 'power2.in' }, 0);
+      tl.to(indicatorRef.current, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 5);
+      tl.to(indicatorRef.current, { opacity: 0, duration: 0.5, ease: 'power2.in' }, 7.5);
+    }
 
     // Enable pointer events appropriately
     const cardsTrigger = ScrollTrigger.create({
@@ -580,12 +649,23 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
 
     const ctaTrigger = ScrollTrigger.create({
       trigger: hero,
-      start: '+=870%',
+      start: '+=580%',
       onEnter: () => {
         if (ctaRef.current) ctaRef.current.style.pointerEvents = 'auto';
       },
       onLeaveBack: () => {
         if (ctaRef.current) ctaRef.current.style.pointerEvents = 'none';
+      }
+    });
+
+    const footerTrigger = ScrollTrigger.create({
+      trigger: hero,
+      start: '+=700%',
+      onEnter: () => {
+        if (footerRef.current) footerRef.current.style.pointerEvents = 'auto';
+      },
+      onLeaveBack: () => {
+        if (footerRef.current) footerRef.current.style.pointerEvents = 'none';
       }
     });
 
@@ -598,20 +678,25 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
         gsap.to(logoGroup, { x: x, y: y, duration: 1.5, ease: 'power2.out', overwrite: 'auto' });
       }
     };
-    document.addEventListener('mousemove', onParallax);
+    if (enableFullMotion) {
+      document.addEventListener('mousemove', onParallax);
+    }
 
     return () => {
       tl.kill();
       cardsTrigger.kill();
       showcaseTrigger.kill();
       ctaTrigger.kill();
-      document.removeEventListener('mousemove', onParallax);
+      footerTrigger.kill();
+      if (enableFullMotion) {
+        document.removeEventListener('mousemove', onParallax);
+      }
     };
-  }, [isMobile]);
+  }, [isMobile, isReducedMotion, isStaticMotion, enableFullMotion, useStackedLayout]);
 
   /* ─── Custom cursor ─── */
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || !enableFullMotion) return;
 
     const dot = document.createElement('div');
     dot.className = 'custom-cursor-dot';
@@ -641,7 +726,7 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
       if (dot.parentNode) dot.parentNode.removeChild(dot);
       if (ring.parentNode) ring.parentNode.removeChild(ring);
     };
-  }, [isMobile]);
+  }, [isMobile, enableFullMotion]);
 
   /* ─── Progress bar + scroll indicator ─── */
   useEffect(() => {
@@ -653,52 +738,62 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
       if (progressRef.current) {
         progressRef.current.style.width = ((scrollTop / docHeight) * 100) + '%';
       }
-      if (indicatorRef.current) {
-        indicatorRef.current.style.opacity = scrollTop > 200 ? '0' : '1';
+      // Static desktop: indicator is fixed; show only during Hero and Features sections
+      if (isStaticDesktop && indicatorRef.current) {
+        const vh = window.innerHeight;
+        const sectionIndex = Math.floor(scrollTop / vh);
+        const posInSection = scrollTop % vh;
+        const inHeroOrFeatures = sectionIndex < 2;
+        indicatorRef.current.style.opacity = (inHeroOrFeatures && posInSection < 80) ? '1' : '0';
       }
+      // Non-static: GSAP timeline controls indicator opacity via scrub tweens
     };
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
-  }, [isMobile]);
+  }, [isMobile, isStaticDesktop]);
 
   return (
     <>
       {/* Progress bar */}
-      {!isMobile && <div ref={progressRef} id="hero-progress-bar" />}
-
-      {/* Scroll indicator */}
-      {!isMobile && (
-        <div
-          ref={indicatorRef}
-          style={{
-            position: 'fixed', bottom: '2rem', left: '50%',
-            transform: 'translateX(-50%)', zIndex: 100,
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            gap: '0.5rem', opacity: 1, transition: 'opacity 0.5s', pointerEvents: 'none',
-          }}
-        >
-          <div className="scroll-mouse"><div className="scroll-wheel" /></div>
-          <span className="scroll-text">Role para explorar</span>
-        </div>
-      )}
+      {!isMobile && !isStaticMotion && <div ref={progressRef} id="hero-progress-bar" />}
 
       {/* ─── Pinned hero section ─── */}
       <section
         ref={heroRef}
+        className={`hero-motion-${animationLevel}${useColumnLayout ? ' hero-vertical-flow' : ''}${isStaticDesktop ? ' hero-static-desktop' : ''}`}
         style={{
-          height: isMobile ? 'auto' : '100vh',
-          minHeight: isMobile ? '100svh' : '100vh',
+          height: (useColumnLayout || isStaticDesktop) ? 'auto' : '100vh',
+          minHeight: (useColumnLayout || isStaticDesktop) ? '100svh' : '100vh',
           position: 'relative',
-          overflow: isMobile ? 'visible' : 'hidden',
+          overflow: (useColumnLayout || isStaticDesktop) ? 'visible' : 'hidden',
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          alignItems: isMobile ? 'stretch' : 'center',
-          justifyContent: isMobile ? 'flex-start' : 'center',
+          flexDirection: (useColumnLayout || isStaticDesktop) ? 'column' : 'row',
+          alignItems: (useColumnLayout || isStaticDesktop) ? 'stretch' : 'center',
+          justifyContent: (useColumnLayout || isStaticDesktop) ? 'flex-start' : 'center',
           background: 'radial-gradient(ellipse 80% 60% at 50% 50%, #003366 0%, #001428 50%, #000810 100%)',
         }}
       >
+        {/* Spacer: holds 100vh so absolute hero content shows; sections flow below */}
+        {isStaticDesktop && (
+          <div style={{ minHeight: '100vh', flexShrink: 0, position: 'relative' }}>
+            <PerspectiveGrid ref={gridRef} />
+            <div
+              ref={indicatorRef}
+              style={{
+                position: 'fixed', bottom: '2.5rem', left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: '0.75rem', zIndex: 10, pointerEvents: 'none',
+              }}
+            >
+              <div className="scroll-mouse"><div className="scroll-wheel" /></div>
+              <span className="scroll-text">Role para explorar</span>
+            </div>
+          </div>
+        )}
+
         {/* Three.js canvas */}
-        {webglOk && !isMobile && (
+        {enableParticles && (
           <canvas
             ref={canvasRef}
             style={{
@@ -711,50 +806,253 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
         {/* Ambient light */}
         <div className="ambient-light" style={{ zIndex: 2 }} />
 
-        {/* Perspective grid */}
-        <PerspectiveGrid ref={gridRef} />
+        {/* Perspective grid — desktop only; on mobile it would bleed into the footer */}
+        {!isStaticDesktop && !useColumnLayout && <PerspectiveGrid ref={gridRef} />}
 
-        {/* Animation Group (Logo + Rings) - Positioned Right */}
-        <div ref={animGroupRef} className="hero-animation-group">
-          {/* Orbital rings - absolute centered in group */}
-          <div
-            ref={ring1Ref}
-            className="orbital-ring ring-1"
-            style={{ width: 380, height: 360, border: '1px solid rgba(255,107,0,0.25)', zIndex: 15 }}
-          />
-          <div
-            ref={ring2Ref}
-            className="orbital-ring ring-2"
-            style={{ width: 460, height: 440, border: '1px solid rgba(0,102,204,0.25)', zIndex: 15 }}
-          />
-          <div
-            ref={ring3Ref}
-            className="orbital-ring ring-3"
-            style={{ width: 540, height: 520, border: '1px solid rgba(255,107,0,0.12)', zIndex: 15 }}
-          />
+        {/* NOTE: mobile/desktop branches share identical inner content — apply any content change in BOTH. */}
+        {useColumnLayout ? (
+          <div className="mobile-full-screen" style={{ order: 0, width: '100%' }}>
+            {/* Animation Group (Logo + Rings) */}
+            <div ref={animGroupRef} className="hero-animation-group">
+              {/* Logo container - relative centered in group (rings moved inside to ensure perfect centering) */}
+              <div className="logo-container">
+                {/* Orbital rings - absolute centered in container */}
+                <div
+                  ref={ring1Ref}
+                  className="orbital-ring ring-1"
+                  style={{ width: 380, height: 360, border: '1px solid rgba(255,107,0,0.25)', zIndex: 15 }}
+                />
+                <div
+                  ref={ring2Ref}
+                  className="orbital-ring ring-2"
+                  style={{ width: 460, height: 440, border: '1px solid rgba(0,102,204,0.25)', zIndex: 15 }}
+                />
+                <div
+                  ref={ring3Ref}
+                  className="orbital-ring ring-3"
+                  style={{ width: 540, height: 520, border: '1px solid rgba(255,107,0,0.12)', zIndex: 15 }}
+                />
 
-          {/* Logo container - relative centered in group */}
-          <div className="logo-container">
-            <div
-              ref={logoRef}
-              style={{
-                width: 280, height: 280,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                filter: 'drop-shadow(0 0 35px rgba(255,107,0,0.45)) drop-shadow(0 0 70px rgba(0,100,255,0.25))',
-              }}
-            >
-              <img
-                src={cnhoraLogo}
-                alt="CNHora"
-                className="logo-glow-anim"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
+                <div
+                  ref={logoRef}
+                  style={{
+                    width: 280, height: 280,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    filter: 'drop-shadow(0 0 35px rgba(255,107,0,0.45)) drop-shadow(0 0 70px rgba(0,100,255,0.25))',
+                    zIndex: 20,
+                  }}
+                >
+                  <img
+                    src={cnhoraLogo}
+                    alt="CNHora"
+                    className="logo-glow-anim"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Hero text */}
+            <div ref={finalRef} className="hero-content-wrapper">
+              {/* Badge */}
+              <div className="hero-badge">
+                <span className="dot" />
+                O marketplace da educação no trânsito
+              </div>
+
+              {/* Title */}
+              <h1 className="hero-title">
+                Seu tempo.<br />
+                <span className="highlight">Sua direção.</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="hero-subtitle">
+                Conectamos alunos a instrutores independentes com tecnologia de ponta.
+                Agende aulas, faça simulados e conquiste sua CNH sem burocracia.
+              </p>
+
+              {/* Stats */}
+              <div className="stats-row">
+                <div className="stat-item">
+                  <div className="stat-number">+12k</div>
+                  <div className="stat-label">Alunos aprovados</div>
+                </div>
+                <div className="stat-divider" />
+                <div className="stat-item">
+                  <div className="stat-number">+800</div>
+                  <div className="stat-label">Instrutores ativos</div>
+                </div>
+                <div className="stat-divider" />
+                <div className="stat-item">
+                  <div className="stat-number">4.9★</div>
+                  <div className="stat-label">Avaliação média</div>
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div className="btn-cta-group">
+                <a href="#cta" className="btn-primary" onClick={(e) => { e.preventDefault(); goToCards('aluno'); }}>
+                  Sou Aluno
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+                <a href="#instrutores" className="btn-secondary" onClick={(e) => { e.preventDefault(); goToCards('instrutor'); }}>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Sou Instrutor
+                </a>
+                <button className="btn-download">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Baixar App
+                </button>
+              </div>
+
+              {/* Trust badges */}
+              <div className="trust-badges">
+                <div className="trust-badge">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  LGPD Compliant
+                </div>
+                <div className="trust-badge">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Pagamento Seguro
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Animation Group (Logo + Rings) - Positioned Right */}
+            <div ref={animGroupRef} className="hero-animation-group">
+              {/* Logo container - relative centered in group (rings moved inside to ensure perfect centering) */}
+              <div className="logo-container">
+                {/* Orbital rings - absolute centered in container */}
+                <div
+                  ref={ring1Ref}
+                  className="orbital-ring ring-1"
+                  style={{ width: 380, height: 360, border: '1px solid rgba(255,107,0,0.25)', zIndex: 15 }}
+                />
+                <div
+                  ref={ring2Ref}
+                  className="orbital-ring ring-2"
+                  style={{ width: 460, height: 440, border: '1px solid rgba(0,102,204,0.25)', zIndex: 15 }}
+                />
+                <div
+                  ref={ring3Ref}
+                  className="orbital-ring ring-3"
+                  style={{ width: 540, height: 520, border: '1px solid rgba(255,107,0,0.12)', zIndex: 15 }}
+                />
+
+                <div
+                  ref={logoRef}
+                  style={{
+                    width: 280, height: 280,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    filter: 'drop-shadow(0 0 35px rgba(255,107,0,0.45)) drop-shadow(0 0 70px rgba(0,100,255,0.25))',
+                    zIndex: 20,
+                  }}
+                >
+                  <img
+                    src={cnhoraLogo}
+                    alt="CNHora"
+                    className="logo-glow-anim"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Main hero content - Positioned Left */}
+            <div ref={finalRef} className="hero-content-wrapper" style={{ order: 1 }}>
+              {/* Badge */}
+              <div className="hero-badge">
+                <span className="dot" />
+                O marketplace da educação no trânsito
+              </div>
+
+              {/* Title */}
+              <h1 className="hero-title">
+                Seu tempo.<br />
+                <span className="highlight">Sua direção.</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="hero-subtitle">
+                Conectamos alunos a instrutores independentes com tecnologia de ponta.
+                Agende aulas, faça simulados e conquiste sua CNH sem burocracia.
+              </p>
+
+              {/* Stats */}
+              <div className="stats-row">
+                <div className="stat-item">
+                  <div className="stat-number">+12k</div>
+                  <div className="stat-label">Alunos aprovados</div>
+                </div>
+                <div className="stat-divider" />
+                <div className="stat-item">
+                  <div className="stat-number">+800</div>
+                  <div className="stat-label">Instrutores ativos</div>
+                </div>
+                <div className="stat-divider" />
+                <div className="stat-item">
+                  <div className="stat-number">4.9★</div>
+                  <div className="stat-label">Avaliação média</div>
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div className="btn-cta-group">
+                <a href="#cta" className="btn-primary" onClick={(e) => { e.preventDefault(); goToCards('aluno'); }}>
+                  Sou Aluno
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+                <a href="#instrutores" className="btn-secondary" onClick={(e) => { e.preventDefault(); goToCards('instrutor'); }}>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Sou Instrutor
+                </a>
+                <button className="btn-download">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Baixar App
+                </button>
+              </div>
+
+              {/* Trust badges */}
+              <div className="trust-badges">
+                <div className="trust-badge">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  LGPD Compliant
+                </div>
+                <div className="trust-badge">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Pagamento Seguro
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Features section — tab switcher + cards */}
-        <div style={{ order: isMobile ? 2 : undefined, width: isMobile ? '100%' : undefined }}>
+        <div
+          className={useColumnLayout ? 'mobile-full-screen' : undefined}
+          style={{ order: useColumnLayout ? 2 : undefined, width: useColumnLayout ? '100%' : undefined }}
+        >
           <Features
             ref={cardsContainerRef}
             activeTab={activeTab}
@@ -764,7 +1062,11 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
         </div>
 
         {/* AppShowcase — animated in by Hero timeline */}
-        <div ref={showcaseRef} className="showcase-in-hero" style={{ order: isMobile ? 3 : undefined }}>
+        <div
+          ref={showcaseRef}
+          className={`showcase-in-hero${useColumnLayout ? ' mobile-full-screen' : ''}`}
+          style={{ order: useColumnLayout ? 3 : undefined }}
+        >
           <div className="showcase-header">
             <h2>O app que <span className="highlight">trabalha</span> por você</h2>
             <p>Três funcionalidades que mudam como alunos e instrutores vivem a habilitação.</p>
@@ -886,7 +1188,11 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
         </div>
 
         {/* CTA Download Section — animated in after AppShowcase */}
-        <div ref={ctaRef} className="cta-download-section" style={{ order: isMobile ? 4 : undefined }}>
+        <div
+          ref={ctaRef}
+          className={`cta-download-section${useColumnLayout ? ' mobile-full-screen' : ''}`}
+          style={{ order: useColumnLayout ? 4 : undefined }}
+        >
 
           {/* Animated logo with orbital rings */}
           <div ref={ctaLogoRef} className="cta-logo-wrapper">
@@ -944,86 +1250,47 @@ const Hero = ({ onPinEnd, onPinEnterBack }) => {
               </svg>
               Baixar na Apple Store
             </a>
+            {useColumnLayout && (
+              <a
+                href="https://wa.me/5511999999999"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cta-btn cta-btn-whatsapp"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                Contato
+              </a>
+            )}
           </div>
 
         </div>
 
-        {/* Main hero content - Positioned Left */}
-        <div ref={finalRef} className="hero-content-wrapper" style={{ order: isMobile ? 1 : undefined }}>
-          {/* Badge */}
-          <div className="hero-badge">
-            <span className="dot" />
-            O marketplace da educação no trânsito
-          </div>
-
-          {/* Title */}
-          <h1 className="hero-title">
-            Seu tempo.<br />
-            <span className="highlight">Sua direção.</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="hero-subtitle">
-            Conectamos alunos a instrutores independentes com tecnologia de ponta.
-            Agende aulas, faça simulados e conquiste sua CNH sem burocracia.
-          </p>
-
-          {/* Stats */}
-          <div className="stats-row">
-            <div className="stat-item">
-              <div className="stat-number">+12k</div>
-              <div className="stat-label">Alunos aprovados</div>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <div className="stat-number">+800</div>
-              <div className="stat-label">Instrutores ativos</div>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <div className="stat-number">4.9★</div>
-              <div className="stat-label">Avaliação média</div>
-            </div>
-          </div>
-
-          {/* CTAs */}
-          <div className="btn-cta-group">
-            <a href="#cta" className="btn-primary" onClick={(e) => { e.preventDefault(); goToCards('aluno'); }}>
-              Sou Aluno
-              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
-            <a href="#instrutores" className="btn-secondary" onClick={(e) => { e.preventDefault(); goToCards('instrutor'); }}>
-              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Sou Instrutor
-            </a>
-            <button className="btn-download">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Baixar App
-            </button>
-          </div>
-
-          {/* Trust badges */}
-          <div className="trust-badges">
-            <div className="trust-badge">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              LGPD Compliant
-            </div>
-            <div className="trust-badge">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Pagamento Seguro
-            </div>
-          </div>
+        {/* Footer — animated in after CTA on desktop; stacked on mobile */}
+        <div
+          ref={footerRef}
+          className="footer-in-hero"
+          style={{ order: useColumnLayout ? 5 : undefined }}
+        >
+          <Footer />
         </div>
+
+        {/* Scroll indicator — full/reduced desktop only (static uses the one inside the spacer) */}
+        {!isMobile && !isStaticDesktop && (
+          <div
+            ref={indicatorRef}
+            style={{
+              position: 'absolute', bottom: '2.5rem', left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              gap: '0.75rem', zIndex: 10, pointerEvents: 'none',
+            }}
+          >
+            <div className="scroll-mouse"><div className="scroll-wheel" /></div>
+            <span className="scroll-text">Role para explorar</span>
+          </div>
+        )}
       </section>
     </>
   );
